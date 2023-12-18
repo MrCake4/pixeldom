@@ -3,7 +3,7 @@ function createNation(x,y) {
     const newNation = {
         x: x,
         y: y,
-        capitol: { x: x, y: y},
+        capital: [{ x: x, y: y}],
         provinces: [{ x: x, y: y}],
         food: 0,
         strength: 1,

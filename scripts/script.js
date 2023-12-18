@@ -10,22 +10,22 @@ const drawIndices = new Set();
 
 let godMode = false;
 let godBtn = document.getElementById("godMode");
+let globalWarCheck = false;
 
 let spwNat = document.getElementById("nationSpawner");
 spwNat.addEventListener("click", function() { initNations(nationCount); });
 
+let globalWarBtn = document.getElementById("globalWar");
+globalWarBtn.addEventListener("click", globalWar);
+
 function startGame() {
-    initNations(2);
-    nations[0].strength = 3;
-    nations[1].strength = 2;
+    //initNations(2);
     console.log("-GAME STARTED\n===CONSOLE LOG===");
-    //declareWar(0,1);
     gameLoop();
 }
 
 function gameLoop() {
     drawMap();
-    attack(0,1);
     expandAllNations();
     checkUserInput();
     requestAnimationFrame(gameLoop);
@@ -146,9 +146,12 @@ function spawnNation(x,y) {
 function expandAllNations() {
     for (const nation of nations) {
         if (nation.atWar===false){expand(nation);}
-        else {console.log(`${nation.name} is at war and cannot expand.`);}
+        else {
+            attack(0, 1);
+            attack(1, 0);}
     }
 }
+
 
 function expand(currentNation) {
     const provincesCopy = [...currentNation.provinces];
@@ -192,10 +195,21 @@ function makePeace(nation1, nation2) {
 }
 
 function globalWar() {
-    for (const nation of nations) {
-        nation.atWar = true;
+    if (globalWarCheck === false){
+        for (const nation of nations) {
+            nation.atWar = true;
+        }
+        console.log(`Global War has been declared`);
+        globalWarBtn.innerHTML = "Global Peace";
+        globalWarCheck = true;
+    } else {
+        for (const nation of nations) {
+            nation.atWar = false;
+        }
+        console.log(`Global Peace has been declared`);
+        globalWarBtn.innerHTML = "Global War";
+        globalWarCheck = false;
     }
-    console.log(`Global War has been declared`);
 }
 
 // WAR-MECHANICS
@@ -257,7 +271,7 @@ function attack(nation1,nation2) {
 
 function checkAnnex(attacker, defender) {
     if (defender.provinces.length <= 500) {
-        //if attacker captured capital of
+        
         const defenderIndex = nations.findIndex(n => n === defender);
         if (defenderIndex !== -1) {
             for (const province of defender.provinces) {
@@ -267,6 +281,8 @@ function checkAnnex(attacker, defender) {
             //nations.splice(defenderIndex, 1);
         }
         console.log(`${attacker.name} has annexed ${defender.name}.`);
+        attacker.atWar = false;
+        defender.atWar = false;
         //makePeace(attacker, defender);
     }
 }
