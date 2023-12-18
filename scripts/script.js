@@ -5,24 +5,26 @@ let mapsrc = "maps/europewwlow.png";
 const img = new Image();
 
 const nations = [];
-const nationCount = 100;
+const nationCount = 1;
 const drawIndices = new Set();
 
 let godMode = false;
 let godBtn = document.getElementById("godMode");
 
+let spwNat = document.getElementById("nationSpawner");
+spwNat.addEventListener("click", function() { initNations(nationCount); });
+
 function startGame() {
-    initNations(nationCount);
+    /*initNations(2);
     nations[0].strength = 3;
-    nations[1].strength = 2;
+    nations[1].strength = 2;*/
+    console.log("-GAME STARTED\n===CONSOLE LOG===");
     gameLoop();
 }
 
 function gameLoop() {
     drawMap();
     expandAllNations();
-    attack(0,1);
-    attack(1,0);
     checkUserInput();
     requestAnimationFrame(gameLoop);
 }
