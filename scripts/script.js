@@ -5,7 +5,7 @@ let mapsrc = "maps/europewwlow.png";
 const img = new Image();
 
 const nations = [];
-const nationCount = 0;
+const nationCount = 100;
 const drawIndices = new Set();
 
 let godMode = false;
@@ -13,6 +13,8 @@ let godBtn = document.getElementById("godMode");
 
 function startGame() {
     initNations(nationCount);
+    nations[0].strength = 3;
+    nations[1].strength = 2;
     gameLoop();
 }
 
@@ -125,6 +127,7 @@ function createNation(x,y) {
         y: y,
         capitol: { x: x, y: y},
         food: 0,
+        strength: 1,
         provinces: [{ x: x, y: y}],
         color: getRandomColor(),
         name: getRandomNationName(), // Generate a random nation name
@@ -149,6 +152,7 @@ function spawnNation(x,y) {
         y: y,
         capitol: { x: x, y: y},
         food: 0,
+        strength: 1,
         provinces: [{ x: x, y: y}],
         color: getRandomColor(),
         name: getRandomNationName(), // Generate a random nation name
@@ -176,7 +180,8 @@ function getRandomColor() {
 // EXPANSION
 function expandAllNations() {
     for (const nation of nations) {
-        expand(nation);
+        if (nation.atWar===false){expand(nation);}
+        else {attack(nation,nation+1);}
     }
 }
 
@@ -221,12 +226,20 @@ function dmakePeace(nation1, nation2) {
     console.log(`Nations ${nations[nation1].name} & ${nations[nation2].name} are now at peace`);
 }
 
+function globalWar() {
+    for (const nation of nations) {
+        nation.atWar = true;
+    }
+    console.log(`Global War has been declared`);
+}
+
 // WAR-MECHANICS
 function attack(nation1,nation2) {
     const attacker = nations[nation1];
     const defender = nations[nation2];
     
     let dice;
+    let attackStrength = attacker.strength;
 
     if (!attacker || !defender) {
         console.error("Invalid nation indices.");
@@ -238,40 +251,43 @@ function attack(nation1,nation2) {
 
     const attackRadius = 1;
 
-    console.log('${attacker.name} Start Attack on ${defender.name}.');
     
-    for (const province of provincesCopy1) {
-        dice = Math.floor(Math.random() * 6);
-        if (dice >= 5) {
-        for (let dx = -attackRadius; dx <= attackRadius; dx++){
-            
-            for (let dy = -attackRadius; dy<=attackRadius; dy++){
-                const x = province.x + dx;
-                const y = province.y + dy;
+    if (attacker.atWar === true && defender.atWar === true) {
+        console.log(`${attacker.name} Start Attack on ${defender.name}.`);
+        for (let i = 0; i < attackStrength; i++)
+            for (const province of provincesCopy1) {
+                dice = Math.floor(Math.random() * 6);
+                if (dice >= 5) {
+                for (let dx = -attackRadius; dx <= attackRadius; dx++){
+                    
+                    for (let dy = -attackRadius; dy<=attackRadius; dy++){
+                        const x = province.x + dx;
+                        const y = province.y + dy;
 
-                // wenn nachbarpixel = grün
-                const index = y * img.width + x;
+                        // wenn nachbarpixel = grün
+                        const index = y * img.width + x;
 
-                if (
-                    x >= 0 && x < img.width &&
-                    y >= 0 && y < img.height &&
-                    map[index] === defender.color &&
-                    !attacker.provinces.some(p => p.x === x && p.y === y) && (dice >= 1)
-                ) {
-                    map[index] = attacker.color;
-                    const defenderProvinceIndex = defender.provinces.findIndex(p => p.x === x && p.y === y);
-                    if (defenderProvinceIndex !== -1) {
-                        defender.provinces.splice(defenderProvinceIndex, 1);
+                        if (
+                            x >= 0 && x < img.width &&
+                            y >= 0 && y < img.height &&
+                            map[index] === defender.color &&
+                            !attacker.provinces.some(p => p.x === x && p.y === y) && (dice >= 1)
+                        ) {
+                            map[index] = attacker.color;
+                            const defenderProvinceIndex = defender.provinces.findIndex(p => p.x === x && p.y === y);
+                            if (defenderProvinceIndex !== -1) {
+                                defender.provinces.splice(defenderProvinceIndex, 1);
+                            }
+
+                            attacker.provinces.push({ x, y });
+                            checkAnnex(attacker, defender);
+                        }
                     }
-
-                    attacker.provinces.push({ x, y });
-                    checkAnnex(attacker, defender);
                 }
+                
             }
         }
-        
     }
-}
 }
 
 function checkAnnex(attacker, defender) {
