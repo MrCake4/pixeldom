@@ -1,0 +1,22 @@
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    text-decoration: none;
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+}
+main {
+    display: grid;
+    flex-direction: row;
+    justify-content: center;
+    text-align: center;
+}
+canvas {
+    display: block;
+    border: 4mm solid #000000;
+}
