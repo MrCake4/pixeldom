@@ -4,9 +4,10 @@ function createNation(x,y) {
         x: x,
         y: y,
         capitol: { x: x, y: y},
+        provinces: [{ x: x, y: y}],
         food: 0,
         strength: 1,
-        provinces: [{ x: x, y: y}],
+        ideology: "democracy",
         color: getRandomColor(),
         name: getRandomNationName(), // Generate a random nation name
         atWar: false,
@@ -21,4 +22,18 @@ function createNation(x,y) {
     newNation.provinces.push({ x: newNation.x, y: newNation.y });
 
     return newNation;
+}
+
+function getRandomNationName() {
+    const nationNames = ["Junko", "Empire", "Republic", "Dynasty", "Federation"];
+    return nationNames[Math.floor(Math.random() * nationNames.length)];
+}
+
+function getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
 }
