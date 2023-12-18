@@ -7,6 +7,9 @@ const img = new Image();
 const nations = [];
 const nationCount = 1;
 const drawIndices = new Set();
+let expansionSpeed = 100;
+let intervalId; // To store the interval ID
+const expansionRateSlider = document.getElementById("expansionRate");
 
 let godMode = false;
 let godBtn = document.getElementById("godMode");
@@ -19,14 +22,14 @@ let globalWarBtn = document.getElementById("globalWar");
 globalWarBtn.addEventListener("click", globalWar);
 
 function startGame() {
-    //initNations(2);
+    intervalId = setInterval(expandAllNations, expansionSpeed);
     console.log("-GAME STARTED\n===CONSOLE LOG===");
     gameLoop();
 }
 
 function gameLoop() {
     drawMap();
-    expandAllNations();
+    //expandAllNations();
     checkUserInput();
     requestAnimationFrame(gameLoop);
 }
@@ -313,6 +316,15 @@ function handleCanvasClick(event) {
         spawnNation(mapX, mapY);
     }
 }
+
+expansionRateSlider.addEventListener("input", function() {
+    expansionSpeed = parseInt(expansionRateSlider.value)*10;
+    document.getElementById("expansionRateLabel").innerHTML = "Expansion Speed: " + expansionSpeed;
+
+    // Clear the existing interval and create a new one with the updated speed
+    clearInterval(intervalId);
+    intervalId = setInterval(expandAllNations, expansionSpeed);
+});
 
 function isLandProvince(x, y) {
     const index = y * img.width + x;
