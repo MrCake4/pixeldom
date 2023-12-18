@@ -5,22 +5,28 @@ let mapsrc = "maps/europewwlow.png";
 const img = new Image();
 
 const nations = [];
-const nationCount = 0;
+const nationCount = 1;
 const drawIndices = new Set();
 
 let godMode = false;
 let godBtn = document.getElementById("godMode");
 
+let spwNat = document.getElementById("nationSpawner");
+spwNat.addEventListener("click", function() { initNations(nationCount); });
+
 function startGame() {
-    initNations(nationCount);
+    initNations(2);
+    nations[0].strength = 3;
+    nations[1].strength = 2;
+    console.log("-GAME STARTED\n===CONSOLE LOG===");
+    //declareWar(0,1);
     gameLoop();
 }
 
 function gameLoop() {
     drawMap();
-    expandAllNations();
     attack(0,1);
-    attack(1,0);
+    expandAllNations();
     checkUserInput();
     requestAnimationFrame(gameLoop);
 }
@@ -116,22 +122,8 @@ function initNations(count){
         console.log("Created Nation "+i);
         nations.push(nation);
     }
-}
 
-function createNation(x,y) {
-    console.log("creating Nation.")
-    const newNation = {
-        x: x,
-        y: y,
-        capitol: { x: x, y: y},
-        food: 0,
-        provinces: [{ x: x, y: y}],
-        color: getRandomColor(),
-        name: getRandomNationName(), // Generate a random nation name
-        atWar: false,
-    };
-
-    do {
+    /**do {
         newNation.x = Math.floor(Math.random() * img.width);
         newNation.y = Math.floor(Math.random() * img.height);
     } while ((map[newNation.y * img.width + newNation.x] !== 1) && (map[newNation.y * img.width + newNation.x] !== 2));
@@ -139,44 +131,22 @@ function createNation(x,y) {
     map[newNation.y * img.width + newNation.x] = 3; // Use a different value to represent nations (e.g., 3)
     newNation.provinces.push({ x: newNation.x, y: newNation.y });
 
-    return newNation;
+    return newNation;**/
 }
 
 function spawnNation(x,y) {
     console.log("creating Nation.")
-    const newNation = {
-        x: x,
-        y: y,
-        capitol: { x: x, y: y},
-        food: 0,
-        provinces: [{ x: x, y: y}],
-        color: getRandomColor(),
-        name: getRandomNationName(), // Generate a random nation name
-        atWar: false,
-    };
+    const newNation = createNation(x,y);
 
     nations.push(newNation);
     map[y * img.width + x] = 3;
 }
 
-function getRandomNationName() {
-    const nationNames = ["Junko", "Empire", "Republic", "Dynasty", "Federation"];
-    return nationNames[Math.floor(Math.random() * nationNames.length)];
-}
-
-function getRandomColor() {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}
-
 // EXPANSION
 function expandAllNations() {
     for (const nation of nations) {
-        expand(nation);
+        if (nation.atWar===false){expand(nation);}
+        else {console.log(`${nation.name} is at war and cannot expand.`);}
     }
 }
 
@@ -215,18 +185,26 @@ function declareWar(nation1, nation2) {
     console.log(`Nations ${nations[nation1].name} & ${nations[nation2].name} are now at war`);
 }
 
-function dmakePeace(nation1, nation2) {
+function makePeace(nation1, nation2) {
     nations[nation1].atWar = false;
     nations[nation2].atWar = false;
     console.log(`Nations ${nations[nation1].name} & ${nations[nation2].name} are now at peace`);
+}
+
+function globalWar() {
+    for (const nation of nations) {
+        nation.atWar = true;
+    }
+    console.log(`Global War has been declared`);
 }
 
 // WAR-MECHANICS
 function attack(nation1,nation2) {
     const attacker = nations[nation1];
     const defender = nations[nation2];
-    
+
     let dice;
+    let attackStrength = attacker.strength;
 
     if (!attacker || !defender) {
         console.error("Invalid nation indices.");
@@ -238,44 +216,47 @@ function attack(nation1,nation2) {
 
     const attackRadius = 1;
 
-    console.log('${attacker.name} Start Attack on ${defender.name}.');
     
-    for (const province of provincesCopy1) {
-        dice = Math.floor(Math.random() * 6);
-        if (dice >= 5) {
-        for (let dx = -attackRadius; dx <= attackRadius; dx++){
-            
-            for (let dy = -attackRadius; dy<=attackRadius; dy++){
-                const x = province.x + dx;
-                const y = province.y + dy;
+    if (attacker.atWar === true && defender.atWar === true) {
+        console.log(`${attacker.name} Start Attack on ${defender.name}.`);
+        for (let i = 0; i < attackStrength; i++)
+            for (const province of provincesCopy1) {
+                dice = Math.floor(Math.random() * 6);
+                if (dice >= 5) {
+                for (let dx = -attackRadius; dx <= attackRadius; dx++){
+                    
+                    for (let dy = -attackRadius; dy<=attackRadius; dy++){
+                        const x = province.x + dx;
+                        const y = province.y + dy;
 
-                // wenn nachbarpixel = grün
-                const index = y * img.width + x;
+                        // wenn nachbarpixel = grün
+                        const index = y * img.width + x;
 
-                if (
-                    x >= 0 && x < img.width &&
-                    y >= 0 && y < img.height &&
-                    map[index] === defender.color &&
-                    !attacker.provinces.some(p => p.x === x && p.y === y) && (dice >= 1)
-                ) {
-                    map[index] = attacker.color;
-                    const defenderProvinceIndex = defender.provinces.findIndex(p => p.x === x && p.y === y);
-                    if (defenderProvinceIndex !== -1) {
-                        defender.provinces.splice(defenderProvinceIndex, 1);
+                        if (
+                            x >= 0 && x < img.width &&
+                            y >= 0 && y < img.height &&
+                            map[index] === defender.color &&
+                            !attacker.provinces.some(p => p.x === x && p.y === y) && (dice >= 1)
+                        ) {
+                            map[index] = attacker.color;
+                            const defenderProvinceIndex = defender.provinces.findIndex(p => p.x === x && p.y === y);
+                            if (defenderProvinceIndex !== -1) {
+                                defender.provinces.splice(defenderProvinceIndex, 1);
+                            }
+
+                            attacker.provinces.push({ x, y });
+                            checkAnnex(attacker, defender);
+                        }
                     }
-
-                    attacker.provinces.push({ x, y });
-                    checkAnnex(attacker, defender);
                 }
+                
             }
         }
-        
     }
-}
 }
 
 function checkAnnex(attacker, defender) {
-    if (defender.provinces.length <= 100) {
+    if (defender.provinces.length <= 500) {
         //if attacker captured capital of
         const defenderIndex = nations.findIndex(n => n === defender);
         if (defenderIndex !== -1) {
@@ -286,7 +267,7 @@ function checkAnnex(attacker, defender) {
             //nations.splice(defenderIndex, 1);
         }
         console.log(`${attacker.name} has annexed ${defender.name}.`);
-        makePeace(attacker, defender);
+        //makePeace(attacker, defender);
     }
 }
 
