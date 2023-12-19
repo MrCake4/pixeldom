@@ -23,7 +23,7 @@ main {
 }
 canvas {
     display: block;
-    border: 4mm solid #000000;
+    border: 1mm solid #000000;
 }
 
 #userUi {

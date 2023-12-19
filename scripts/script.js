@@ -5,16 +5,18 @@ let mapsrc = "maps/europewwlow.png";
 const img = new Image();
 
 const nations = [];
-const nationCount = 1;
+let nationCount = 1;
 const drawIndices = new Set();
 let expansionSpeed = 100;
 let intervalId; // To store the interval ID
 const expansionRateSlider = document.getElementById("expansionRate");
+const nationRateSlider = document.getElementById("nationRate");
 
 let godMode = false;
 let godBtn = document.getElementById("godMode");
 let globalWarCheck = false;
 
+// Buttons
 let spwNat = document.getElementById("nationSpawner");
 spwNat.addEventListener("click", function() { initNations(nationCount); });
 
@@ -324,6 +326,11 @@ expansionRateSlider.addEventListener("input", function() {
     // Clear the existing interval and create a new one with the updated speed
     clearInterval(intervalId);
     intervalId = setInterval(expandAllNations, expansionSpeed);
+});
+
+nationRateSlider.addEventListener("input", function() {
+    nationCount = parseInt(nationRateSlider.value);
+    document.getElementById("nationRateLabel").innerHTML = "Nation Count: " + nationCount;
 });
 
 function isLandProvince(x, y) {
