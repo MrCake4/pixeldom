@@ -77,7 +77,7 @@ function drawMap(){
         const x = (i % img.width) * pixelSize;
         const y = Math.floor(i / img.width) * pixelSize;
         ctx.fillRect(x, y, pixelSize, pixelSize);
-        drawBorder(x,y,i);
+        //drawBorder(x,y,i);
     }
 }
 
