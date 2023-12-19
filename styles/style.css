@@ -25,3 +25,16 @@ canvas {
     display: block;
     border: 4mm solid #000000;
 }
+
+#userUi {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #e1e1e1;
+}
+
+#userUi * {
+    margin-left: auto;
+    margin-right: auto;
+}
