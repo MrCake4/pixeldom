@@ -3,11 +3,12 @@ function createNation(x,y) {
     const newNation = {
         x: x,
         y: y,
-        capitol: { x: x, y: y},
+        capital: [{ x: x, y: y}],
         provinces: [{ x: x, y: y}],
         food: 0,
+        stability: 100,
         strength: 1,
-        ideology: "democracy",
+        ideology: getIdeology("democracy"),
         color: getRandomColor(),
         name: getRandomNationName(), // Generate a random nation name
         atWar: false,
@@ -36,4 +37,25 @@ function getRandomColor() {
         color += letters[Math.floor(Math.random() * 16)];
     }
     return color;
+}
+
+function getIdeology(ideology){
+    switch(ideology){
+        case "democracy":
+            stability = 0;
+            
+            return "democracy";
+        case "dictatorship":
+            return "dictatorship";
+        case "monarchy":
+            return "monarchy";
+        case "theocracy":
+            return "theocracy";
+        case "communism":
+            return "communism";
+        case "fascism":
+            return "fascism";
+        default:
+            return "democracy";
+    }
 }

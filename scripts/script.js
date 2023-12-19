@@ -7,26 +7,29 @@ const img = new Image();
 const nations = [];
 const nationCount = 1;
 const drawIndices = new Set();
+let expansionSpeed = 100;
+let intervalId; // To store the interval ID
+const expansionRateSlider = document.getElementById("expansionRate");
 
 let godMode = false;
 let godBtn = document.getElementById("godMode");
+let globalWarCheck = false;
 
 let spwNat = document.getElementById("nationSpawner");
 spwNat.addEventListener("click", function() { initNations(nationCount); });
 
+let globalWarBtn = document.getElementById("globalWar");
+globalWarBtn.addEventListener("click", globalWar);
+
 function startGame() {
-    initNations(2);
-    nations[0].strength = 3;
-    nations[1].strength = 2;
+    intervalId = setInterval(expandAllNations, expansionSpeed);
     console.log("-GAME STARTED\n===CONSOLE LOG===");
-    //declareWar(0,1);
     gameLoop();
 }
 
 function gameLoop() {
     drawMap();
-    attack(0,1);
-    expandAllNations();
+    //expandAllNations();
     checkUserInput();
     requestAnimationFrame(gameLoop);
 }
@@ -74,7 +77,7 @@ function drawMap(){
         const x = (i % img.width) * pixelSize;
         const y = Math.floor(i / img.width) * pixelSize;
         ctx.fillRect(x, y, pixelSize, pixelSize);
-        drawBorder(x,y,i);
+        //drawBorder(x,y,i);
     }
 }
 
@@ -146,9 +149,12 @@ function spawnNation(x,y) {
 function expandAllNations() {
     for (const nation of nations) {
         if (nation.atWar===false){expand(nation);}
-        else {console.log(`${nation.name} is at war and cannot expand.`);}
+        else {
+            attack(0, 1);
+            attack(1, 0);}
     }
 }
+
 
 function expand(currentNation) {
     const provincesCopy = [...currentNation.provinces];
@@ -192,10 +198,21 @@ function makePeace(nation1, nation2) {
 }
 
 function globalWar() {
-    for (const nation of nations) {
-        nation.atWar = true;
+    if (globalWarCheck === false){
+        for (const nation of nations) {
+            nation.atWar = true;
+        }
+        console.log(`Global War has been declared`);
+        globalWarBtn.innerHTML = "Global Peace";
+        globalWarCheck = true;
+    } else {
+        for (const nation of nations) {
+            nation.atWar = false;
+        }
+        console.log(`Global Peace has been declared`);
+        globalWarBtn.innerHTML = "Global War";
+        globalWarCheck = false;
     }
-    console.log(`Global War has been declared`);
 }
 
 // WAR-MECHANICS
@@ -257,7 +274,7 @@ function attack(nation1,nation2) {
 
 function checkAnnex(attacker, defender) {
     if (defender.provinces.length <= 500) {
-        //if attacker captured capital of
+        
         const defenderIndex = nations.findIndex(n => n === defender);
         if (defenderIndex !== -1) {
             for (const province of defender.provinces) {
@@ -267,6 +284,8 @@ function checkAnnex(attacker, defender) {
             //nations.splice(defenderIndex, 1);
         }
         console.log(`${attacker.name} has annexed ${defender.name}.`);
+        attacker.atWar = false;
+        defender.atWar = false;
         //makePeace(attacker, defender);
     }
 }
@@ -297,6 +316,15 @@ function handleCanvasClick(event) {
         spawnNation(mapX, mapY);
     }
 }
+
+expansionRateSlider.addEventListener("input", function() {
+    expansionSpeed = parseInt(expansionRateSlider.value)*10;
+    document.getElementById("expansionRateLabel").innerHTML = "Expansion Speed: " + expansionSpeed;
+
+    // Clear the existing interval and create a new one with the updated speed
+    clearInterval(intervalId);
+    intervalId = setInterval(expandAllNations, expansionSpeed);
+});
 
 function isLandProvince(x, y) {
     const index = y * img.width + x;
